@@ -1,0 +1,9 @@
+[dbservers]
+
+dbserver1
+dbserver2
+
+[development]
+
+dbnode1 ansible_connection=ssh ansible_ssh_user=dbnode1 ansible_ssh_pass=password
+dbnode2 ansible_connection=ssh ansible_ssh_user=dbnode2 ansible_ssh_pass=password

@@ -1,0 +1,53 @@
+---
+# tasks file for maintenance
+
+- name: Create lock directory if doesnt exists
+  file: 
+    path: "{{ lock.path }}"
+    state: directory
+
+- name: Check if lock is acquired
+  stat:
+    path: "{{lock.path }}{{ lock.file }}"
+  register: lock_data
+
+- name: Log lock already acquired 
+  syslogger: 
+    msg: "Node maintenance lock already acquired"
+    priority: warning
+  when: lock_data.stat.exists 
+
+
+- name: End if lock is acquired
+  meta: end_host
+  when: lock_data.stat.exists
+
+- name: Acquire lock
+  file:
+    path: "{{lock.path }}{{ lock.file }}"
+    state: present
+
+- name: Log start 
+  syslogger: 
+    msg: "Node maintenance starting"
+    priority: info
+
+# - name: Notify before running script
+
+- name: Run script
+  script: maintenance.sh
+
+- name: Log finish 
+  syslogger: 
+    msg: "Node maintenance end"
+    priority: info
+
+# - name: Notify after running script
+
+- name: Release lock
+  file:
+    path: "{{lock.path }}{{ lock.file }}"
+    state: absent
+
+
+

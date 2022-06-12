@@ -1,0 +1,6 @@
+---
+# vars file for maintenance
+
+lock:
+  directory: /etc/node-maintenance/
+  file: maintenance.lock

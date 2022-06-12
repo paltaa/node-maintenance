@@ -1,0 +1,31 @@
+version: "3.9"  
+services:
+  node-maintenance:
+    build: .
+    command: ansible-playbook
+    volumes:
+      - ./:/opt/node-maintenance
+  dbnode1:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: dbnode1
+    hostname: dbnode1
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - SUDO_ACCESS=true 
+      - PASSWORD_ACCESS=true 
+      - USER_PASSWORD=password 
+      - USER_NAME=node1
+  dbnode2:
+    image: lscr.io/linuxserver/openssh-server:latest
+    hostname: dbnode2
+    container_name: dbnode2 
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - SUDO_ACCESS=true 
+      - PASSWORD_ACCESS=true 
+      - USER_PASSWORD=password 
+      - USER_NAME=node2 
