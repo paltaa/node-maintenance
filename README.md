@@ -4,7 +4,26 @@
 
 MySQL node maintenance task runner Ansible role
 
-## Usage
+## Instructions
+
+Setting up development and production environment for node-maintenance task
+
+### Data Dog integration
+
+1. Set api key
+
+```bash
+export DATADOG_API_KEY=<your-api-key>
+echo "api_key: ${DATADOG_API_KEY}" >> ./callback_plugins/datadog_callback.yml
+```
+
+2. Install requirements
+
+```bash
+pip install -r ./callback_plugins/requirements.txt
+```
+
+### Set variables and inventory
 
 Set variables in .`/variables.yaml`
 
