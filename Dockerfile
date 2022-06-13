@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-  apt-get install -y gcc python-dev libkrb5-dev && \
+  apt-get install -y gcc python-dev libkrb5-dev openssh-client sshpass && \
   apt-get install python3-pip -y && \
   pip3 install --upgrade pip && \
   pip3 install --upgrade virtualenv && \
@@ -16,5 +16,5 @@ WORKDIR /opt/node-maintenance
 
 COPY . .
 
-CMD ["ansible-playbook", "main.yaml"]
+CMD ["ansible-playbook", "main.yaml", "-i" ,"inventory", "-l", "dbservers"]
 

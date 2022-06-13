@@ -5,5 +5,5 @@ dbserver2
 
 [development]
 
-dbnode1 ansible_connection=ssh ansible_ssh_user=dbnode1 ansible_ssh_pass=password
-dbnode2 ansible_connection=ssh ansible_ssh_user=dbnode2 ansible_ssh_pass=password
+localhost ansible_connection=ssh ansible_user=vagrant  ansible_port=2222 ansible_ssh_extra_args='-o StrictHostKeyChecking=no' ansible_password=vagrant
+

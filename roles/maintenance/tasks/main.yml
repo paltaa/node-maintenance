@@ -3,12 +3,12 @@
 
 - name: Create lock directory if doesnt exists
   file: 
-    path: "{{ lock.path }}"
+    path: "{{ lock.directory }}"
     state: directory
 
 - name: Check if lock is acquired
   stat:
-    path: "{{lock.path }}{{ lock.file }}"
+    path: "{{lock.directory }}{{ lock.file }}"
   register: lock_data
 
 - name: Log lock already acquired 
@@ -17,15 +17,23 @@
     priority: warning
   when: lock_data.stat.exists 
 
-
 - name: End if lock is acquired
   meta: end_host
   when: lock_data.stat.exists
 
+- name: Copy scripts to host
+  copy:
+    src: "{{ scripts.directory }}"
+    dest: "{{ scripts.target }}"
+
+- name: Register scripts to run
+  command: "ls {{ scripts.target }}"
+  register: scripts
+
 - name: Acquire lock
   file:
-    path: "{{lock.path }}{{ lock.file }}"
-    state: present
+    path: "{{lock.directory }}{{ lock.file }}"
+    state: touch
 
 - name: Log start 
   syslogger: 
@@ -34,8 +42,9 @@
 
 # - name: Notify before running script
 
-- name: Run script
-  script: maintenance.sh
+- name: Run scripts
+  script: "{{ item }}"
+  with_items: "{{ scripts.stdout_lines }}"
 
 - name: Log finish 
   syslogger: 
@@ -47,6 +56,11 @@
 - name: Release lock
   file:
     path: "{{lock.path }}{{ lock.file }}"
+    state: absent
+
+- name: Clean up scripts
+  file:
+    path: "{{ scripts.target }}"
     state: absent
 
 

@@ -4,3 +4,8 @@
 lock:
   directory: /etc/node-maintenance/
   file: maintenance.lock
+
+# Will look for scripts in ./roles/maintenance/files/scripts
+scripts:
+  directory: scripts
+  target: /etc/scripts
