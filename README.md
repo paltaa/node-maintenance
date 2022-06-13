@@ -6,34 +6,49 @@ MySQL node maintenance task runner Ansible role
 
 ## Usage
 
+Set variables in .`/variables.yaml`
+
 All scripts in ./roles/maintenance/files/scripts will be executed in each of the nodes.
 
-Set nodes in inventory file, mount keys in docker container if necesary or set path in inventory file
+Set nodes in `inventory` files and credentials for ssh
+
 
 ## Deploy
 
-Deploy with ansible script deploy.yml will setup docker container as a cronjob for each hour
+Copy crontab from `deploy/crontab` example and add to your server crontab after installing dependencies and cloning repository.
 
-Deploy with Kubernetes Cronjob will setup a cronjob each hour with no paralellism and wont trigger a new job if the last ona has not finished
+
+### Kubernetes Cronjob
+
+will setup a cronjob each hour with no paralellism and wont trigger a new job if the last one has not finished
+
+1. Build and push the image to a container registry
+
+2. Set variables:
+    activeDeadlineSeconds: 3600 # Maximum amount of time in seconds to the job
+    image: container-image-url:tag # Container registry url and tag
+
+### Deploy with Ansible playbook
+
+Did not have time to write this one:
+
+Deploy with ansible script `deploy.yml` will setup ansible as a cronjob for each hour
+
+
+## Development
 
 ### Requirements
-
-
-Option 1:
 
 - vagrant
 - virtualBox
 - Ansible
 - sshpass (sshs for MacOs)
-  
-Option 2:
 
-- Docker
-- Docker-compose
+### Instructions
 
-## Development
+Set variables in .`/variables.yaml`
 
-Option 1: playbook runs in host and connects to vm provisioned by vagrant
+Playbook runs in host and connects to vm provisioned by vagrant
 
 Setup VM
 
@@ -47,14 +62,9 @@ Run playbook
 ansible-playbook main.yaml -i inventory -l development -b
 ```
 
-
-
-Option 1: playbooks run in docker
-
-Run command will setup 2 servers with ssh service running on port 2222
+In another terminal, connect to VM with ssh
 
 ```bash
-docker-compose up
+vagrant ssh
 ```
-
 

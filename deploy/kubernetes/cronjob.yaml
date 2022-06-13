@@ -1,0 +1,29 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: node-maintenance
+  name: node-maintenance
+spec:
+  schedule: '0 * * * *'
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app: node-maintenance
+        spec:
+          containers:
+            - env:
+                - name: RELEASE_NAME
+                  value: banking
+              image: 658464581062.dkr.ecr.us-east-1.amazonaws.com/orionx/bancochile:00cc3d577ffe0e4182e1e9d2a23c732864f5ca2f
+              imagePullPolicy: Always
+              name: node-maintenance
+              resources: {}
+          terminationGracePeriodSeconds: 30
+  successfulJobsHistoryLimit: 2
+  suspend: false

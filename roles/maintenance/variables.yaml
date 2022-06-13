@@ -1,5 +1,5 @@
 ---
-# vars file for maintenance
+# Example vars file for maintenance
 
 lock:
   directory: /etc/node-maintenance/

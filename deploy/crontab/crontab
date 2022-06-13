@@ -1,0 +1,1 @@
+13 20 * * * ansible-playbook main.yaml -i inventory -l dbservers -b

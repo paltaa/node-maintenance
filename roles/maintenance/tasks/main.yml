@@ -21,46 +21,83 @@
   meta: end_host
   when: lock_data.stat.exists
 
-- name: Copy scripts to host
-  copy:
-    src: "{{ scripts.directory }}"
-    dest: "{{ scripts.target }}"
-
-- name: Register scripts to run
-  command: "ls {{ scripts.target }}"
-  register: scripts
-
 - name: Acquire lock
   file:
     path: "{{lock.directory }}{{ lock.file }}"
     state: touch
+
+- name: Copy scripts to host
+  copy:
+    src: "{{ scripts.directory }}"
+    dest: "{{ scripts.target }}"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Register scripts to run
+  command: "ls {{ scripts.target }}/{{ scripts.directory }}"
+  register: scripts_to_run
 
 - name: Log start 
   syslogger: 
     msg: "Node maintenance starting"
     priority: info
 
-# - name: Notify before running script
+- name: Send start notification message via Slack
+  community.general.slack:
+    token: "{{ notification.slack.token }}"
+    msg: "{{ inventory_hostname }} maintenance starting"
+  delegate_to: localhost
+  when: notification.slack.enabled 
+  ignore_errors: true
+
+- debug: "msg={{ scripts_to_run }}"
 
 - name: Run scripts
-  script: "{{ item }}"
-  with_items: "{{ scripts.stdout_lines }}"
+  command: "sh {{ scripts.target }}{{ scripts.directory }}/{{ item }}"
+  with_items: "{{ scripts_to_run.stdout_lines }}"
+  register: out
+  ignore_errors: true
+
+- debug: "msg={{ out }}"
+
+- name: Log scripts with error
+  syslogger: 
+    msg: "Node maintenance script {{ item.item}} exit status {{ item.rc }}"
+    priority: err
+  when:  item.rc > 0
+  with_items: "{{ out.results }}"
+
+- name: Send errors to Slack
+  community.general.slack:
+    token: "{{ notification.slack.token }}"
+    msg: "{{ inventory_hostname }} maintenance script {{ item.item }} error with exit code {{ item.rc }}"
+  delegate_to: localhost
+  when: 
+  - notification.slack.enabled 
+  - item.rc > 0
+  ignore_errors: true
+  with_items: "{{ out.results }}"
 
 - name: Log finish 
   syslogger: 
     msg: "Node maintenance end"
     priority: info
 
-# - name: Notify after running script
+- name: Send finish notification message via Slack
+  community.general.slack:
+    token: "{{ notification.slack.token }}"
+    msg: "{{ inventory_hostname }} maintenance finished"
+  delegate_to: localhost
+  when: notification.slack.enabled 
+  ignore_errors: true
 
 - name: Release lock
   file:
-    path: "{{lock.path }}{{ lock.file }}"
+    path: "{{lock.directory }}{{ lock.file }}"
     state: absent
 
 - name: Clean up scripts
   file:
-    path: "{{ scripts.target }}"
+    path: "{{ scripts.target }}/{{ scripts.directory }}"
     state: absent
 
 
